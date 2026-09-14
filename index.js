@@ -62,16 +62,12 @@ app.get("/edit/:id", (req, res) => {
     return;
   }
 
-  console.log(posts.find(post => post.id === id));
-
   res.render("editor.ejs", { post: posts.find(post => post.id === id) });
 });
 
 app.post("/delete/:id", (req, res) => {
   if (posts.some(post => post.id === Number(req.params.id))) {
-    console.log(posts.filter(post => post.id != Number(req.params.id)))
     posts = posts.filter(post => post.id != Number(req.params.id))
-    console.log(posts.filter(post => post.id != Number(req.params.id)))
   }
   res.redirect('/')
 });
@@ -84,7 +80,6 @@ app.post("/submit-post", (req, res) => {
     title: req.body.title,
     content: req.body.content,
   };
-  console.log(constructed_post);
 
   if (constructed_post.author.length === 0) {
     res.send("Error: Cannot submit with no author");
