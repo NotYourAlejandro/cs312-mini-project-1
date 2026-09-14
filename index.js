@@ -40,20 +40,45 @@ app.get("/", (req, res) => {
 });
 
 app.get("/edit/:id", (req, res) => {
-  if (req.params.id == "new")
+  let id = 0;  
+
+  if (req.params.id == "new") {
+    if (posts.length > 0) {
+      id = Number(posts[posts.length - 1].id) + 1;
+    } else {
+      id = 1;
+    }
+
     res.render("editor.ejs", {
-      post: { id: posts.length + 1, title: "New Post", content: "" },
+      post: { id: id, title: "New Post", content: "" },
     });
-  // check if given post id exists
-  else if (!posts.some((post) => post.id == Number(req.params.id)))
-    res.send(`Error: Invalid post id '${req.params.id}'`);
-  // set id to either the requested id or the next available one
-  else res.render("editor.ejs", { post: posts[Number(req.params.id) - 1] });
+    return;
+  }
+  
+  id = posts.find(post => post.id == Number(req.params.id)).id;
+  
+  if (id === undefined) {
+    res.status(404).send(`Error: Invalid post id '${req.params.id}'`);
+    return;
+  }
+
+  console.log(posts.find(post => post.id === id));
+
+  res.render("editor.ejs", { post: posts.find(post => post.id === id) });
+});
+
+app.post("/delete/:id", (req, res) => {
+  if (posts.some(post => post.id === Number(req.params.id))) {
+    console.log(posts.filter(post => post.id != Number(req.params.id)))
+    posts = posts.filter(post => post.id != Number(req.params.id))
+    console.log(posts.filter(post => post.id != Number(req.params.id)))
+  }
+  res.redirect('/')
 });
 
 app.post("/submit-post", (req, res) => {
   const constructed_post = {
-    id: req.body.id,
+    id: Number(req.body.id),
     date: new Date(),
     author: req.body.author,
     title: req.body.title,
@@ -61,19 +86,22 @@ app.post("/submit-post", (req, res) => {
   };
   console.log(constructed_post);
 
-  if (constructed_post.author === undefined) {
+  if (constructed_post.author.length === 0) {
     res.send("Error: Cannot submit with no author");
   }
-  else if (constructed_post.title === undefined) {
+  else if (constructed_post.title.length === 0) {
     res.send("Error: Cannot submit with no title");
     return;
-  } else if (constructed_post.content === undefined) {
+  } else if (constructed_post.content.length === 0) {
     res.send("Error: Cannot submit with no post content");
     return;
   }
 
-  if (posts.some((post) => post.id == req.body.id)) {
-    posts[constructed_post.id - 1] = constructed_post;
+  if (posts.some(post => post.id == Number(req.body.id))) {
+    const index = posts.findIndex(post => post.id == Number(req.body.id))
+    
+    if (index !== -1)
+      posts[index] = constructed_post;
   } else {
     posts.push(constructed_post);
   }
