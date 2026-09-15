@@ -1,5 +1,4 @@
 import express from "express";
-// import { type Express, type Request, type Response } from "express";
 import bodyParser from "body-parser";
 
 const app = express();
@@ -83,6 +82,7 @@ app.post("/submit-post", (req, res) => {
 
   if (constructed_post.author.length === 0) {
     res.send("Error: Cannot submit with no author");
+    return;
   }
   else if (constructed_post.title.length === 0) {
     res.send("Error: Cannot submit with no title");
@@ -95,8 +95,8 @@ app.post("/submit-post", (req, res) => {
   if (posts.some(post => post.id == Number(req.body.id))) {
     const index = posts.findIndex(post => post.id == Number(req.body.id))
     
-    if (index !== -1)
-      posts[index] = constructed_post;
+  if (index !== -1)
+    posts[index] = constructed_post;
   } else {
     posts.push(constructed_post);
   }
@@ -104,4 +104,4 @@ app.post("/submit-post", (req, res) => {
   res.redirect("/");
 });
 
-app.listen(port, () => console.log(`Listening on port ${port}`));
+app.listen(port, () => console.log(`Open in browser: http://localhost:7777`));
